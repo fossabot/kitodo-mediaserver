@@ -18,9 +18,9 @@ import java.util.Locale;
 import org.kitodo.mediaserver.core.db.entities.User;
 import org.kitodo.mediaserver.ui.exceptions.UserExistsException;
 import org.kitodo.mediaserver.ui.exceptions.UserNotFoundException;
+import org.kitodo.mediaserver.ui.utils.MvcUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.context.NoSuchMessageException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -70,14 +70,7 @@ public class UserController {
     public String list(Model model, @ModelAttribute("errorDelete") String errorDelete, Locale locale) {
         List<User> users = userService.findAll();
         model.addAttribute("users", users);
-        if (errorDelete != null && !errorDelete.isEmpty()) {
-            try {
-                String msg = messageSource.getMessage(errorDelete, new Object[]{}, locale);
-                model.addAttribute("error", msg);
-            } catch (NoSuchMessageException e) {
-                model.addAttribute("error", errorDelete);
-            }
-        }
+        MvcUtils.handleRedirectError(model, errorDelete, locale, messageSource);
         return "users/users";
     }
 
