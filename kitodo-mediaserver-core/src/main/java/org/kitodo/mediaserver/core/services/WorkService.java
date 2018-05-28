@@ -11,11 +11,14 @@
 
 package org.kitodo.mediaserver.core.services;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.kitodo.mediaserver.core.db.entities.ActionData;
 import org.kitodo.mediaserver.core.db.entities.Work;
+import org.kitodo.mediaserver.core.db.repositories.ActionRepository;
 import org.kitodo.mediaserver.core.db.repositories.WorkRepository;
 import org.kitodo.mediaserver.core.db.specifications.WorkJpaSpecification;
 import org.kitodo.mediaserver.core.exceptions.WorkNotFoundException;
@@ -32,13 +35,16 @@ public class WorkService {
 
     private WorkRepository workRepository;
 
-    public WorkRepository getWorkRepository() {
-        return workRepository;
-    }
+    private ActionService actionService;
 
     @Autowired
     public void setWorkRepository(WorkRepository workRepository) {
         this.workRepository = workRepository;
+    }
+
+    @Autowired
+    public void setActionService(ActionService actionService) {
+        this.actionService = actionService;
     }
 
     /**
@@ -81,5 +87,31 @@ public class WorkService {
      */
     public void updateWork(Work work) {
         workRepository.save(work);
+    }
+
+    /**
+     * Get the lock comment for a work.
+     * @param work the Work
+     * @return the lock comment
+     */
+    public String getLockComment(Work work) {
+        ActionData actionData = actionService.getLastFinishedAction(work, "workLockAction");
+        return actionData.getParameter().get("comment");
+    }
+
+    /**
+     * Locks or unlocks a work.
+     * @param work the Work
+     * @param enabled lock or unlock
+     * @param comment lock comment
+     * @throws Exception action exceptions
+     */
+    public void lockWork(Work work, Boolean enabled, String comment) throws Exception {
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put("enabled", enabled.toString());
+        parameter.put("comment", comment);
+
+        ActionData actionData = actionService.request(work, "workLockAction", parameter);
+        actionService.performRequested(actionData);
     }
 }

@@ -15,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import org.kitodo.mediaserver.core.actions.CacheDeleteAction;
+import org.kitodo.mediaserver.core.actions.WorkLockAction;
 import org.kitodo.mediaserver.core.config.FileserverProperties;
 import org.kitodo.mediaserver.core.util.FileDeleter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,5 +165,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public FileDeleter fileDeleter() {
         FileDeleter fileDeleter = new FileDeleter();
         return fileDeleter;
+    }
+
+    @Bean
+    public WorkLockAction workLockAction() {
+        WorkLockAction workLockAction = new WorkLockAction();
+        return workLockAction;
     }
 }
